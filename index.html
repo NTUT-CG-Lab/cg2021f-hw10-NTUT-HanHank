@@ -165,7 +165,7 @@
             so.addChild("讀取文件並顯示資訊", 4, true);
             so.addChild("使用直接法渲染影像(MIPS)", 2, true);
             so.addChild("使用直接法渲染影像(ISO)", 2, true);
-            so.addChild("使用調色盤變更材質的colormap", 2, false);
+            so.addChild("使用調色盤變更材質的colormap", 2, true);
 
             //產生自評表，參數如下所示
             so.renderModal(
@@ -326,14 +326,24 @@
 
             //MIPS or ISO
             document.querySelectorAll('input[name=rtype]').forEach((option) => {
-                option.addEventListener('click', (evt) => { })
+                option.addEventListener('click', (evt) => {
+                    arg.renderType = 0;
+                    controlView.updateRGBA();
+                 })
             })
 
             arg.renderType = 0
 
             // RAW文件讀取
             loadLocalRawFile('./raw/CTchest_64_64_64_uint8.raw', (result) => {
-
+                let width = 64;
+                let height = 64;
+                let depth = 64;
+                let bit = 8;
+                console.log('Read')
+                let data = new Uint8ClampedArray(result);
+                field = new ScaleField(width, height, depth, data, arg.rgba);
+                controlView.updateVolumeData(field);
             })
         }
 
@@ -342,7 +352,12 @@
             controlView = new ControlView(document.getElementById('palette'), arg)
 
             //當調色盤的參數變更時，觸發事件
-            controlView.addEventListener('change', () => {})
+            controlView.addEventListener('change', () => {
+                if(field==null){
+                    return;
+                }
+                modelView.renderVolume(field, getColormap(), arg);
+            })
 
             init()
         }
